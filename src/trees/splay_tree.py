@@ -16,17 +16,24 @@ class SplayTree(BST):
         pass
     
     def search(self, vruntime: float) -> tuple:
-        # Busqueda con conteo de pasos y posterior splay del nodo encontrado
-        return (None, 0)
+        # Llamada al metodo search de la superclase BST
+        found_node, steps = super().search(vruntime)
+        
+        # Ejecucion de rotaciones ascendentes si la busqueda fue exitosa
+        if found_node is not None:
+            self._splay(found_node)
+            
+        # Retorno de la tupla (Par de valores) requerida manteniendo el conteo de pasos original
+        return (found_node, steps)
 
     def _splay(self, node: Node) -> None:
         # Ejecucion de rotaciones ascendentes hasta la raiz
         pass
 
     def _zig(self, node: Node) -> None:
-        # Rotacion a la derecha segun nomenclatura especifica
+        # Rotacion a la derecha 
         pass
 
     def _zag(self, node: Node) -> None:
-        # Rotacion a la izquierda segun nomenclatura especifica
+        # Rotacion a la izquierda 
         pass
