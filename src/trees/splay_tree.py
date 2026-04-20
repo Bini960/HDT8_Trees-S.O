@@ -1,0 +1,32 @@
+from .bst import BST
+from src.models.node import Node
+from src.models.process import Process
+
+class SplayTree(BST):
+    """
+    Implementacion de un Splay Tree que reorganiza su estructura mediante 
+    movimientos zig y zag al acceder a los nodos.
+    """
+    def __init__(self):
+        # Inicializacion de la estructura base BST
+        super().__init__()
+
+    def insert(self, process: Process) -> None:
+        # Insercion seguida de la operacion splay hacia la raiz
+        pass
+    
+    def search(self, vruntime: float) -> tuple:
+        # Busqueda con conteo de pasos y posterior splay del nodo encontrado
+        return (None, 0)
+
+    def _splay(self, node: Node) -> None:
+        # Ejecucion de rotaciones ascendentes hasta la raiz
+        pass
+
+    def _zig(self, node: Node) -> None:
+        # Rotacion a la derecha segun nomenclatura especifica
+        pass
+
+    def _zag(self, node: Node) -> None:
+        # Rotacion a la izquierda segun nomenclatura especifica
+        pass

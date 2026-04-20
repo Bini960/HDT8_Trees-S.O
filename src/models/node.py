@@ -1,0 +1,16 @@
+from .process import Process
+
+class Node:
+    """
+    Define la unidad basica de los arboles de busqueda, vinculando un 
+    objeto Process con referencias a sus nodos hijos y padre.
+    """
+    def __init__(self, process: Process):
+        # Instancia de la clase Process que contiene los datos
+        self.process = process
+        # Referencia al hijo izquierdo
+        self.left = None
+        # Referencia al hijo derecho
+        self.right = None
+        # Referencia al nodo superior para facilitar rotaciones
+        self.parent = None
