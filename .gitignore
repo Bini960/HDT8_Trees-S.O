@@ -1,6 +1,7 @@
 # Archivos compilados
 bin/
 *.class
+__pycache__/
 
 # Configuración de IDE
 .classpath

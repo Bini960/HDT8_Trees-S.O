@@ -5,18 +5,25 @@ from src.models.process import Process
 from src.trees.bst import BST
 from src.trees.splay_tree import SplayTree
 
-def visualize(node, dot=None, count=[0]):
-    # Representacion parcial con Graphviz para no saturar la imagen
-    if dot is None: dot = Digraph(comment='BST Snapshot')
+def visualize(node, dot=None, count=None):
+    # Se inicializan las variables por cada llamada independiente
+    if dot is None: dot = Digraph(comment='Tree Snapshot')
+    if count is None: count = [0]
+    
     if node and count[0] < 15:
         count[0] += 1
         dot.node(str(id(node)), f"PID: {node.process.pid}\nVR: {node.process.vruntime:.1f}")
-        if node.left:
+        
+        # Validacion del hijo izquierdo antes de dibujar la arista
+        if node.left and count[0] < 15:
             dot.edge(str(id(node)), str(id(node.left)))
             visualize(node.left, dot, count)
-        if node.right:
+            
+        # Validacion del hijo derecho antes de dibujar la arista
+        if node.right and count[0] < 15:
             dot.edge(str(id(node)), str(id(node.right)))
             visualize(node.right, dot, count)
+            
     return dot
 
 # 1. Simulacion: 1000 procesos aleatorios siguiendo el Paso 4
@@ -53,8 +60,7 @@ plt.show()
 # 4. Exportar visualización de árbol (Paso 4.2)
 # Genera un archivo PNG en la carpeta docs/
 visualize(bst.root).render('docs/bst_graph', format='png', cleanup=True)
-snapshot = visualize(splay.root)
-snapshot.render('docs/splay_graph', format='png', cleanup=True)
+visualize(splay.root).render('docs/splay_graph', format='png', cleanup=True)
 
 
 print(f"Promedio BST: {sum(res_bst)/100:.2f}")
