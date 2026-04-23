@@ -48,3 +48,38 @@ print(f"Iteraciones para encontrar el proceso 1000 en Splay Tree: {pasos_splay}"
 # 4. Mostrar y enviar la visualizacion de la porcion representativa (primeros 15 nodos)
 visualize(bst_b.root, count=[0]).render('docs/bst_escenario_b', format='png', cleanup=True)
 visualize(splay_b.root, count=[0]).render('docs/splay_escenario_b', format='png', cleanup=True)
+
+# --- ESCENARIO C: PROCESO FRECUENTE (Proceso Frecuente de I/O) ---
+
+# 1. Generación de 1000 procesos en orden aleatorio
+procesos = [Process(i, random.uniform(0, 5000)) for i in range(1, 1001)]
+splay_tree = SplayTree()
+
+# 2. Inserción de procesos
+for p in procesos:
+    splay_tree.insert(p)
+
+# 3. Simulación de E/S: Buscar el MISMO proceso 50 veces seguidas
+proceso_objetivo = random.choice(procesos)
+resultados_iteraciones = []
+
+print(f"-- Resultados Escenario C (PID: {proceso_objetivo.pid}) --")
+
+for i in range(50):
+    _, pasos = splay_tree.search(proceso_objetivo.vruntime)
+    resultados_iteraciones.append(pasos)
+    if i < 3 or i == 49:
+        print(f"Búsqueda {i+1}: {pasos} iteraciones")
+
+# 4. Gráfica de rendimiento
+plt.figure(figsize=(10, 5))
+plt.plot(resultados_iteraciones, marker='o', color='green', label='Splay Tree')
+plt.title('splay_escenario_c')
+plt.xlabel('Número de Intento')
+plt.ylabel('Cantidad de Iteraciones')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# 5. Visualización del estado final (el proceso buscado debería estar en la raíz)
+visualize(splay_tree.root, count=[0]).render('docs/splay_escenario_c', format='png', cleanup=True)
