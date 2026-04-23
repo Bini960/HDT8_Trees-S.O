@@ -3,6 +3,12 @@ from src.models.node import Node
 from src.models.process import Process
 
 class BST(ITree):
+    """
+    Implementa un Árbol Binario de Búsqueda estándar.
+    Su objetivo es organizar los procesos del sistema según su 
+    tiempo de ejecución, enviando los menores a la izquierda 
+    y los mayores a la derecha.
+    """
     def __init__(self):
         # Llama al constructor de la clase abstracta ITree para inicializar la raiz en None
         super().__init__()

@@ -14,3 +14,6 @@ class Node:
         self.right = None
         # Referencia al nodo superior para facilitar rotaciones
         self.parent = None
+        # Atributo de color para para Red-Black Tree (1 = rojo, 0 = negro)
+        # Se inicializa en 1 por defecto para las nuevas inserciones
+        self.color = 1

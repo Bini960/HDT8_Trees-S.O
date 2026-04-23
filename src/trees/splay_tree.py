@@ -3,6 +3,12 @@ from src.models.node import Node
 from src.models.process import Process
 
 class SplayTree(BST):
+    """
+    Implementación del Árbol Splay.
+    Su objetivo es reorganizar la estructura interna, moviendo 
+    el nodo de memoria más recientemente utilizado hacia la raíz mediante 
+    rotaciones.
+    """
     def insert(self, process: Process) -> None:
         # Insercion y splay inmediato
         super().insert(process)
