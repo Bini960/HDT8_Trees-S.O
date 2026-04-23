@@ -26,42 +26,25 @@ def visualize(node, dot=None, count=None):
             
     return dot
 
-# 1. Simulacion: 1000 procesos aleatorios siguiendo el Paso 4
-procesos = [Process(i, random.uniform(0, 5000)) for i in range(1000)]
-bst, splay = BST(), SplayTree()
+# Escenario B (Peor Caso) 
 
-# Insercion de los mismos 1000 procesos en ambas estructuras
-for p in procesos:
-    bst.insert(p)
-    splay.insert(p)
+# 1. Generacion de 1000 procesos ordenados ascendentemente (vruntime de 1 a 1000)
+procesos_secuenciales = [Process(i, float(i)) for i in range(1, 1001)]
+bst_b, splay_b = BST(), SplayTree()
 
-# 2. Medicion: 100 busquedas aleatorias de procesos existentes
-muestras = random.sample(procesos, 100)
-res_bst, res_splay = [], []
+# 2. Insercion secuencial en las estructuras
+for p in procesos_secuenciales:
+    bst_b.insert(p)
+    splay_b.insert(p)
 
-for m in muestras:
-    # Ambos metodos search retornan (NodoEncontrado, CantidadDePasos)
-    _, s1 = bst.search(m.vruntime)
-    _, s2 = splay.search(m.vruntime)
-    res_bst.append(s1)
-    res_splay.append(s2)
+# 3. Busqueda especifica del ultimo proceso insertado (Proceso 1000)
+_, pasos_bst = bst_b.search(1000.0)
+_, pasos_splay = splay_b.search(1000.0)
 
-# 3. Grafica Matplotlib comparativa
-plt.figure(figsize=(10, 5))
-plt.plot(res_bst, label='BST', alpha=0.8, marker='o', markersize=3, color='blue')
-plt.plot(res_splay, label='Splay Tree', alpha=0.8, marker='x', markersize=3, color='green')
-plt.xlabel('Procesos Evaluados')
-plt.ylabel('Cantidad de Iteraciones')
-plt.title('Escenario A: Rendimiento BST vs Splay Tree')
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.6)
-plt.show()
+print("-- Resultados Escenario B --")
+print(f"Iteraciones para encontrar el proceso 1000 en BST: {pasos_bst}")
+print(f"Iteraciones para encontrar el proceso 1000 en Splay Tree: {pasos_splay}")
 
-# 4. Exportar visualización de árbol (Paso 4.2)
-# Genera un archivo PNG en la carpeta docs/
-visualize(bst.root).render('docs/bst_graph', format='png', cleanup=True)
-visualize(splay.root).render('docs/splay_graph', format='png', cleanup=True)
-
-
-print(f"Promedio BST: {sum(res_bst)/100:.2f}")
-print(f"Promedio Splay: {sum(res_splay)/100:.2f}")
+# 4. Mostrar y enviar la visualizacion de la porcion representativa (primeros 15 nodos)
+visualize(bst_b.root, count=[0]).render('docs/bst_escenario_b', format='png', cleanup=True)
+visualize(splay_b.root, count=[0]).render('docs/splay_escenario_b', format='png', cleanup=True)
