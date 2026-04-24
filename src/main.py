@@ -6,24 +6,31 @@ from src.trees.bst import BST
 from src.trees.splay_tree import SplayTree
 from src.trees.red_black_tree import RedBlackTree
 
-def visualize(node, dot=None, count=None):
+def visualize(node, dot=None, count=None, phantom=None):
     # Se inicializan las variables por cada llamada independiente
     if dot is None: dot = Digraph(comment='Tree Snapshot')
     if count is None: count = [0]
     
-    if node and count[0] < 15:
+    # Se verifica que el nodo no sea nulo ni sea el nodo_fantasma del RBT
+    if node and node != phantom and count[0] < 15:
         count[0] += 1
-        dot.node(str(id(node)), f"PID: {node.process.pid}\nVR: {node.process.vruntime:.1f}")
         
-        # Validacion del hijo izquierdo antes de dibujar la arista
-        if node.left and count[0] < 15:
+        # Determinar color: Rojo si color=1, Negro si color=0 (por defecto negro para BST/Splay)
+        node_color = "red" if getattr(node, 'color', None) == 1 else "black"
+        
+        dot.node(str(id(node)), 
+            f"PID: {node.process.pid}\nVR: {node.process.vruntime:.1f}", 
+            color=node_color, fontcolor=node_color)
+        
+        # Validación del hijo izquierdo antes de dibujar la arista
+        if node.left and node.left != phantom and count[0] < 15:
             dot.edge(str(id(node)), str(id(node.left)))
-            visualize(node.left, dot, count)
+            visualize(node.left, dot, count, phantom) # Pasar el phantom recursivamente
             
-        # Validacion del hijo derecho antes de dibujar la arista
-        if node.right and count[0] < 15:
+        # Validación del hijo derecho antes de dibujar la arista
+        if node.right and node.right != phantom and count[0] < 15:
             dot.edge(str(id(node)), str(id(node.right)))
-            visualize(node.right, dot, count)
+            visualize(node.right, dot, count, phantom) # Pasar el phantom recursivamente
             
     return dot
 
@@ -72,62 +79,72 @@ print(f"Promedio BST: {sum(iter_bst)/100:.2f}")
 print(f"Promedio Splay: {sum(iter_splay)/100:.2f}")
 print(f"Promedio Red-Black: {sum(iter_rbt)/100:.2f}")
 
-# Escenario B (Peor Caso) 
+# --- PASO 5: ESCENARIO B - LLEGADA SECUENCIAL ---
 
-# 1. Generacion de 1000 procesos ordenados ascendentemente (vruntime de 1 a 1000)
+# 1. Generación de 1000 procesos ordenados (1 a 1000)
 procesos_secuenciales = [Process(i, float(i)) for i in range(1, 1001)]
-bst_b, splay_b = BST(), SplayTree()
+bst_b = BST()
+splay_b = SplayTree()
+rbt_b = RedBlackTree() # Se agrega el Red-Black Tree
 
-# 2. Insercion secuencial en las estructuras
+# 2. Inserción secuencial
 for p in procesos_secuenciales:
     bst_b.insert(p)
     splay_b.insert(p)
+    rbt_b.insert(p)
 
-# 3. Busqueda especifica del ultimo proceso insertado (Proceso 1000)
+# 3. Búsqueda del proceso 1000 en las tres estructuras
 _, pasos_bst = bst_b.search(1000.0)
 _, pasos_splay = splay_b.search(1000.0)
+_, pasos_rbt = rbt_b.search(1000.0)
 
-print("-- Resultados Escenario B --")
-print(f"Iteraciones para encontrar el proceso 1000 en BST: {pasos_bst}")
-print(f"Iteraciones para encontrar el proceso 1000 en Splay Tree: {pasos_splay}")
+print("-- Resultados Escenario B (Búsqueda del proceso 1000) --")
+print(f"BST: {pasos_bst} iteraciones")
+print(f"Splay Tree: {pasos_splay} iteraciones")
+print(f"Red-Black Tree: {pasos_rbt} iteraciones")
 
-# 4. Mostrar y enviar la visualizacion de la porcion representativa (primeros 15 nodos)
+# 4. Generar visualizaciones representativas
 visualize(bst_b.root, count=[0]).render('docs/bst_escenario_b', format='png', cleanup=True)
 visualize(splay_b.root, count=[0]).render('docs/splay_escenario_b', format='png', cleanup=True)
+# Para el RBT se pasa el nodo_fantasma para evitar graficarlo
+visualize(rbt_b.root, count=[0], phantom=rbt_b.nodo_fantasma).render('docs/rbt_escenario_b', format='png', cleanup=True)
+
 
 # --- ESCENARIO C: PROCESO FRECUENTE (Proceso Frecuente de I/O) ---
 
-# 1. Generación de 1000 procesos en orden aleatorio
-procesos = [Process(i, random.uniform(0, 5000)) for i in range(1, 1001)]
-splay_tree = SplayTree()
+# 1. Preparación de las estructuras con 1000 procesos aleatorios
+procesos_c = [Process(i, random.uniform(0, 5000)) for i in range(1, 1001)]
+splay_c = SplayTree()
+rbt_c = RedBlackTree() # Integración del Red-Black Tree
 
-# 2. Inserción de procesos
-for p in procesos:
-    splay_tree.insert(p)
+for p in procesos_c:
+    splay_c.insert(p)
+    rbt_c.insert(p)
 
-# 3. Simulación de E/S: Buscar el MISMO proceso 50 veces seguidas
-proceso_objetivo = random.choice(procesos)
-resultados_iteraciones = []
+# 2. Simulación: Buscar el MISMO proceso 50 veces seguidas
+proceso_objetivo = random.choice(procesos_c)
+iter_splay = []
+iter_rbt = []
 
-print(f"-- Resultados Escenario C (PID: {proceso_objetivo.pid}) --")
+print(f"\n-- Escenario C: Buscando PID {proceso_objetivo.pid} 50 veces --")
 
-for i in range(50):
-    _, pasos = splay_tree.search(proceso_objetivo.vruntime)
-    resultados_iteraciones.append(pasos)
-    if i < 3 or i == 49:
-        print(f"Búsqueda {i+1}: {pasos} iteraciones")
+for _ in range(50):
+    _, pasos_s = splay_c.search(proceso_objetivo.vruntime)
+    _, pasos_r = rbt_c.search(proceso_objetivo.vruntime)
+    iter_splay.append(pasos_s)
+    iter_rbt.append(pasos_r)
 
-# 4. Gráfica de rendimiento
-plt.figure(figsize=(10, 5))
-plt.plot(resultados_iteraciones, marker='o', color='green', label='Splay Tree')
-plt.title('splay_escenario_c')
+# 3. Gráfica comparativa de iteraciones
+plt.figure(figsize=(10, 6))
+plt.plot(iter_rbt, label='Red-Black Tree (Estático)', color='red', linestyle='--')
+plt.plot(iter_splay, label='Splay Tree (Dinámico)', color='green', linewidth=2)
+plt.title('Escenario C: 50 Búsquedas del Mismo Proceso')
 plt.xlabel('Número de Intento')
-plt.ylabel('Cantidad de Iteraciones')
+plt.ylabel('Iteraciones')
 plt.legend()
 plt.grid(True)
+plt.savefig('docs/comparativa_escenario_c.png')
 plt.show()
 
-# 5. Visualización del estado final (el proceso buscado debería estar en la raíz)
-visualize(splay_tree.root, count=[0]).render('docs/splay_escenario_c', format='png', cleanup=True)
-
-
+print(f"Promedio Splay Tree: {sum(iter_splay)/50:.2f}")
+print(f"Promedio Red-Black Tree: {sum(iter_rbt)/50:.2f}")
